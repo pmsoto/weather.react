@@ -1,56 +1,65 @@
 import React, { useState } from "react";
+import WeatherInfo from "./WeatherInfo";
 import axios from "axios";
+import "./Weather.css";
 
-export default function SearchEngine() {
-  let [city, setCity] = useState("");
-  let [details, setDetails] = useState(false);
-  let [weather, setWeather] = useState({});
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    let apiKey = "094780c710fa4efd669f0df8c3991927";
-    let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-    axios.get(apiUrl).then(showWeather);
-  }
-
-  function showWeather(response) {
-    setDetails(true);
-    setWeather({
-      temperature: response.data.main.temp,
+export default function Weather(props) {
+  const [weatherData, setWeatherData] = useState({ ready: false });
+  const [city, setCity] = useState(props.defaultCity);
+  function handleResponse(response) {
+    console.log(response.data);
+    setWeatherData({
+      ready: true,
+      date: new Date(response.data.time * 1000),
+      temperature: response.data.temperature.current,
+      city: response.data.city,
+      precipitation: 0,
+      humidity: response.data.temperature.humidity,
       wind: response.data.wind.speed,
-      humidity: response.data.main.humidity,
-      icon: `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`,
-      description: response.data.weather[0].description,
+      description: response.data.condition.description,
+      icon: response.data.condition.icon,
     });
   }
 
-  function updateCity(event) {
+  function search() {
+    let apiKey = "6caa16b0540f85od4c55153dbff8tb89";
+    let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}}&key=${apiKey}&units=metric`;
+    axios.get(apiUrl).then(handleResponse);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    search();
+  }
+
+  function handleCityChange(event) {
     setCity(event.target.value);
   }
 
-  let form = (
-    <form onSubmit={handleSubmit}>
-      <input type="search" placeholder="Enter a city.." onChange={updateCity} />
-      <button type="Submit">Search</button>
-    </form>
-  );
-
-  if (details) {
+  if (weatherData.ready) {
     return (
-      <div>
-        {form}
-        <ul>
-          <li>Temperature: {Math.round(weather.temperature) * 1.8 + 32}°F</li>
-          <li>Description: {weather.description}</li>
-          <li>Humidity: {weather.humidity}%</li>
-          <li>Wind: {Math.round(weather.wind)} km/h</li>
-          <li>
-            <img src={weather.icon} alt={weather.description} />
-          </li>
-        </ul>
+      <div className="Weather">
+        <form onSubmit={handleSubmit}>
+          <div className="row">
+            <div className="col-9">
+              <input
+                type="search"
+                placeholder="Enter a city"
+                className="form-control"
+                autoFocus="on"
+                onChange={handleCityChange}
+              />
+            </div>
+            <div className="col-3">
+              <input type="submit" value="Search" className="btn btn-primary" />
+            </div>
+          </div>
+        </form>
+        <WeatherInfo data={weatherData} />
       </div>
     );
   } else {
-    return form;
+    search();
+    return "Loading...";
   }
 }
