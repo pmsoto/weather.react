@@ -7,18 +7,19 @@ import "./Weather.css";
 export default function Weather(props) {
   const [weatherData, setWeatherData] = useState({ ready: false });
   const [city, setCity] = useState(props.defaultCity);
+
   function handleResponse(response) {
     console.log(response.data);
     setWeatherData({
       ready: true,
+      coordinates: response.data.coordinates,
       date: new Date(response.data.time * 1000),
       temperature: response.data.temperature.current,
       city: response.data.city,
-      precipitation: 0,
       humidity: response.data.temperature.humidity,
       wind: response.data.wind.speed,
-      description: response.data.condition.description,
-      icon: response.data.condition.icon,
+      description: response.data.condition[0].description,
+      icon: response.data.condition[0].icon,
     });
   }
 
@@ -57,7 +58,7 @@ export default function Weather(props) {
           </div>
         </form>
         <WeatherInfo data={weatherData} />
-        <WeatherForecast city={weatherData.handleCityChange} />
+        <WeatherForecast coordinates={weatherData.coordinates} />
       </div>
     );
   } else {

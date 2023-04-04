@@ -13,6 +13,7 @@ export default function WeatherForecast(props) {
   }
 
   if (loaded) {
+    console.log(forecast);
     return (
       <div className="WeatherForecast">
         <div className="row">
@@ -30,8 +31,10 @@ export default function WeatherForecast(props) {
     );
   } else {
     let apiKey = "6caa16b0540f85od4c55153dbff8tb89";
-    let city = props.city;
-    let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}}`;
+    let longitude = props.coordinates.longitude;
+    let latitude = props.coordinates.latitude;
+
+    let apiUrl = `https://api.shecodes.io/weather/v1/forecast?lon=${longitude}&lat=${latitude}&key=${apiKey}&units=metric`;
 
     axios.get(apiUrl).then(handleResponse);
 
